@@ -1,0 +1,26 @@
+{
+  "name": "goout_backend",
+  "version": "1.0.0",
+  "description": "Backend of GoOut",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nixaboo/GoOut_Backend.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nixaboo/GoOut_Backend/issues"
+  },
+  "homepage": "https://github.com/nixaboo/GoOut_Backend#readme",
+  "dependencies": {
+    "bluebird": "^3.5.3",
+    "jssoup": "0.0.10",
+    "mysql2": "^1.6.5",
+    "request": "^2.88.0",
+    "sequelize": "^4.43.0"
+  }
+}
