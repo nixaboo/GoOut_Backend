@@ -114,8 +114,8 @@ async function testClipa() {
         return ret;
     }).flat();
 
-    //showsData.length = 5;
-    //showsData[0].id = 8187;
+    //showsData.length = 1;
+    //showsData[0].id = 7885;
 
     showsData = await Promise.map(showsData, async function fetchShowFrame(show) {
         if(!show.entries)
@@ -131,7 +131,7 @@ async function testClipa() {
             var httpBody = options.body || await httpGet(options.url);
 
             var parsed = new jssoup(httpBody);
-            var ticketLink = parsed.findAll('div', 'ticket-link');
+            var ticketLink = parsed.findAll(undefined, 'ticket-link');
             var readMore = parsed.findAll('a', 'read-more');
             var prodDetails = parsed.findAll('div', 'prod-details');
 
@@ -154,8 +154,9 @@ async function testClipa() {
                 function resolveValue(lookupText, specificSelector) {
                     var list = liList.filter(li => {
                             if(li.contents.length > 0 &&
-                               li.contents[0].contents.length > 0 &&
-                               li.contents[0].contents[0]._text)
+                                li.contents[0].contents &&
+                                li.contents[0].contents.length > 0 &&
+                                li.contents[0].contents[0]._text)
                                 return li.contents[0].contents[0]._text.indexOf(lookupText) >= 0
                             return false;
                         });
@@ -173,12 +174,35 @@ async function testClipa() {
                 values.date = moment(dateStr, "DD.MM.YY");
                 values.time = resolveValue( 'שעה:');
                 values.location = resolveValue( 'מיקום:');
+                //first try to find a span with a price --> if its not there its in a <form class="variations_form cart"
                 values.price = resolveValue( 'מחיר:', (li) => {
                     var list = li.findAll('span', 'woocommerce-Price-amount');
                     if(list.length > 0 && list[0].contents[0]._text)
                         return list[0].contents[0]._text.match(/[0-9,]+/)[0].replace(/,/g, '');
                     return '';
                 });
+
+                function getPriceFromVariationForm() {
+                    var formList = parsed.findAll('form', ['variations_form', 'cart']);
+                    if(formList.length == 0)
+                        return '';
+
+                    var formHtml = formList[0].prettify();
+                    var split = formHtml.split('woocommerce-Price-amount');
+                    if(split.length <= 1)
+                        return '';
+
+                    var regex = /\d+\.\d+/;
+                    var match = regex.exec(split[1]);
+                    if(match.length > 0)
+                        return match[0];
+
+                    return '';
+                }
+                if(values.price == '') {
+                    values.price = getPriceFromVariationForm();
+                }
+
                 values.title = parsed.findAll(undefined, 'section-title')[0].getText().replace(/[\r\n\t]/g, '');
                 values.desc = parsed.findAll('div', ['col-md-6','col-sm-6','col-xs-12','single-right'])[0].prettify();
                 var bgImage = parsed.findAll('div', 'bg-image')[0];
