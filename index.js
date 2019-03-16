@@ -1,6 +1,7 @@
 var request = require('request');
 var jssoup = require('jssoup').default;
 var fs = require('fs');
+var moment = require('moment');
 global.Promise=require("bluebird");
 
 const Sequelize = require('sequelize');
@@ -113,7 +114,8 @@ async function testClipa() {
         return ret;
     }).flat();
 
-    showsData.length = 1;
+    //showsData.length = 5;
+    //showsData[0].id = 8187;
 
     showsData = await Promise.map(showsData, async function fetchShowFrame(show) {
         if(!show.entries)
@@ -130,7 +132,7 @@ async function testClipa() {
 
             var parsed = new jssoup(httpBody);
             var ticketLink = parsed.findAll('div', 'ticket-link');
-            var readMore = parsed.findAll('div', 'read-more');
+            var readMore = parsed.findAll('a', 'read-more');
             var prodDetails = parsed.findAll('div', 'prod-details');
 
 
@@ -140,8 +142,7 @@ async function testClipa() {
             });
 
             await Promise.each(readMore, async entry => {
-                var url = entrpy.findAll('a')[0].attrs['href'];
-                await processPage({url : url}, depth+1);
+                await processPage({url : entry.attrs['href']}, depth+1);
             });
 
             //if we have prod-details we insert an entry into the showsAdded
@@ -168,16 +169,22 @@ async function testClipa() {
                 }
 
                 var values = {};
-                values.date = resolveValue( 'תאריך:');
+                var dateStr = resolveValue( 'תאריך:').match(/\d+\.\d+\.\d+/)[0];
+                values.date = moment(dateStr, "DD.MM.YY");
                 values.time = resolveValue( 'שעה:');
                 values.location = resolveValue( 'מיקום:');
-                /*values.price = resolveValue( 'מחיר:', (li) => {
-                    var list = li.findAll('span', 'amount');
-                    if(list.length > 0)
-                        return list[0]._text;
+                values.price = resolveValue( 'מחיר:', (li) => {
+                    var list = li.findAll('span', 'woocommerce-Price-amount');
+                    if(list.length > 0 && list[0].contents[0]._text)
+                        return list[0].contents[0]._text.match(/[0-9,]+/)[0].replace(/,/g, '');
                     return '';
-                });*/
+                });
                 values.title = parsed.findAll(undefined, 'section-title')[0].getText().replace(/[\r\n\t]/g, '');
+                values.desc = parsed.findAll('div', ['col-md-6','col-sm-6','col-xs-12','single-right'])[0].prettify();
+                var bgImage = parsed.findAll('div', 'bg-image')[0];
+                values.image = bgImage.attrs.style.match(/(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png)/)[0];
+
+                //  Work on how we match URLs for images later
                 show.entries.push(values);
             });
 
@@ -214,7 +221,7 @@ async function testClipa() {
         showsData.price = values[4];
         return showsData;*/
         return show;
-    }, {concurrency : 2});
+    }, {concurrency : 3});
 
     console.log('Done!');
 
