@@ -155,7 +155,7 @@ async function testClipa() {
                 throw new Error('Got to depth-level 10');
             }
 
-            var httpBody = options.body || await httpGet(options.url);
+            var httpBody = options.body || await http.get(options.url);
 
             var parsed = new jssoup(httpBody);
             var ticketLink = parsed.findAll(undefined, 'ticket-link');

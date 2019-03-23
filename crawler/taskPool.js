@@ -19,7 +19,7 @@ class TaskPool
         this.current = this.current.filter(x => !x.isComplete);
 
         while(this.current.length < this.concurrent && this.tasks.length > 0) {
-            var t = this.tasks.shift();
+            var t = this.tasks.pop();
             this.current.push(t);
             t.start(this);
         }
