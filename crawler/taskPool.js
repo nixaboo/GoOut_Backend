@@ -19,9 +19,9 @@ class TaskPool
         this.current = this.current.filter(x => !x.isComplete);
 
         while(this.current.length < this.concurrent && this.tasks.length > 0) {
-            var t = this.tasks.pop();
+            var t = this.tasks.shift();
             this.current.push(t);
-            t.start();
+            t.start(this);
         }
     }
 
@@ -31,6 +31,5 @@ class TaskPool
         this.timer = setInterval(this.tick.bind(this), 100);
     }
 }
-
 
 module.exports = TaskPool;

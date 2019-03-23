@@ -1,18 +1,19 @@
 const assert = require('assert');
 class Task {
-    constructor(name, task) {
+    constructor(name, task, options) {
         this.name = name;
         this.task = task;
         this.isRunning = false;
         this.isComplete = false;
         this.isError = false;
+        this.options = options;
     }
 
-    start() {
+    start(taskPool) {
         var t = this;
         assert.ok(!this.isRunning);
         this.isRunning = true;
-        this.task().then(() => {
+        this.task(taskPool, this.options).then(() => {
             t.isComplete = true;
         }).catch((e) => {
             t.isError = true;
