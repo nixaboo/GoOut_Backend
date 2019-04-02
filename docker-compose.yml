@@ -1,0 +1,20 @@
+version: '3.2'
+services:
+  web:
+    build: .
+    #command: nodemon -L --inspect-brk=0.0.0.0:5858 index.js
+    working_dir: /GoOut_Backend
+    
+    ports:
+      - "5858:5858"
+    volumes:
+      - type: bind
+        source: /GoOut_Backend
+        target: /GoOut_Backend
+
+#    depends_on:
+#      - mongo
+#  mongo:
+#    image: mongo
+#    ports:
+#      - "27017:27017"

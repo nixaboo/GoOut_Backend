@@ -23,6 +23,7 @@ async function entry(taskPool, options) {
         var task = new Task("clipa_fetchAjaxFrame", fetchAjaxFrame, {showId : showId});
         taskPool.addTask(task);
     });
+
     return true;
 }
 
@@ -50,18 +51,25 @@ async function processPage(taskPool, options) {
 
     var prods = html.selectNodes('//div[contains(@class, "prod-details")]');
 
+    var liXPath = (text) => `//li[span[contains(text(),"${text}")]]/text()`;
     if(prods.length > 0) {
 
-        var fields = [field('תאריך', 'date',  [fh.regexMatch(/\d+\.\d+\.\d+/),
-                                                                    fh.parseDate("DD.MM.YY")]),
-            field('שעה', 'time', fh.regexReplace(/[\r\n\t]/g)),
-            field('מיקום', 'location', fh.regexReplace(/[\r\n\t]/g))];
+        var fields = [{xpath: liXPath('תאריך'), target: 'date', onEnd: [fh.regexMatch(/\d+\.\d+\.\d+/), fh.parseDate("DD.MM.YY")]},
+                      {xpath: liXPath('שעה'), target: 'time', onEnd: [fh.regexReplace(/[\r\n\t]/g)]},
+                      {xpath: liXPath('מיקום'), target: 'location', onEnd: [fh.regexReplace(/[\r\n\t]/g)]},
+                      {xpath: '//*[contains(@class, "section-title")]/text()', target: 'title', onEnd: [fh.regexReplace(/[\r\n\t]/g)]},
+                      //{xpath: '//div[contains(@class, "single-right")]', target: 'desc', onEnd: [fh.regexReplace(/[\r\n\t]/g)]},
+                      {xpath: '//div[contains(@class, "bg-image")]/@background-image', target: 'image', onEnd: [fh.regexMatch(/[\r\n\t]/g)]}];
+
+
+        // values.title = parsed.findAll(undefined, 'section-title')[0].getText().replace(/[\r\n\t]/g, '');
+        // values.desc = parsed.findAll('div', ['col-md-6','col-sm-6','col-xs-12','single-right'])[0].prettify();
+        // var bgImage = parsed.findAll('div', 'bg-image')[0];
+        // values.image = bgImage.attrs.style.match(/(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png)/)[0];
 
         var ret = {};
         fields.forEach(field => {
-            var xpath = `//li[span[contains(text(),"${field.htmlText}")]]/text()`;
-            var value = html.selectValue(xpath, '');
-
+            var value = html.selectValue(field.xpath, '');
             field.onEnd.forEach(fn => value = fn(value));
             ret[field.target] = value;
         })

@@ -11,14 +11,19 @@ Object.defineProperty(Array.prototype, 'flat', {
     }
 });
 
-var TaskPool = require('./crawler/taskPool');
+function start() { 
+    var TaskPool = require('./crawler/taskPool');
 
 
+    //ADDED NEW CODE
+    var pool = new TaskPool();
+    pool.start();
+    
+    
+    var t = require('./tasks/clipaTask');
+    
+    pool.addTask(t);
+}
 
-var pool = new TaskPool();
-pool.start();
 
-
-var t = require('./tasks/clipaTask');
-
-pool.addTask(t);
+start();
