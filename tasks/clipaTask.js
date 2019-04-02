@@ -19,6 +19,7 @@ async function entry(taskPool, options) {
     var htmlParser =  new HtmlParser(raw);
     var results = htmlParser.selectValues(['//div[@class="details"]/@data-tickets'], (x) => x.split(','));
 
+    results = results.splice(1, 1);
     results.forEach(showId => {
         var task = new Task("clipa_fetchAjaxFrame", fetchAjaxFrame, {showId : showId});
         taskPool.addTask(task);
@@ -59,7 +60,7 @@ async function processPage(taskPool, options) {
                       {xpath: liXPath('מיקום'), target: 'location', onEnd: [fh.regexReplace(/[\r\n\t]/g)]},
                       {xpath: '//*[contains(@class, "section-title")]/text()', target: 'title', onEnd: [fh.regexReplace(/[\r\n\t]/g)]},
                       //{xpath: '//div[contains(@class, "single-right")]', target: 'desc', onEnd: [fh.regexReplace(/[\r\n\t]/g)]},
-                      {xpath: '//div[contains(@class, "bg-image")]/@background-image', target: 'image', onEnd: [fh.regexMatch(/[\r\n\t]/g)]}];
+                      {xpath: '//div[contains(@class, "bg-image")]/@style', target: 'image', onEnd: [fh.regexMatch(/(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png)/)]}];
 
 
         // values.title = parsed.findAll(undefined, 'section-title')[0].getText().replace(/[\r\n\t]/g, '');

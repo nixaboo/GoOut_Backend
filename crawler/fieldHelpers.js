@@ -3,8 +3,8 @@ var moment = require('moment');
 function regexMatch(regex) {
     return (value) => {
         if(value && regex) {
-            var match = value.match(/\d+\.\d+\.\d+/);
-            if(match.length > 0)
+            var match = value.match(regex);
+            if(match && match.length > 0)
                 return match[0];
         }
 
