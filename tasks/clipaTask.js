@@ -11,15 +11,12 @@ var config = {
     }
 }
 
-
-
-
 async function entry(taskPool, options) {
     var raw = await http.get(config.urls.SHOW_LISTING);
     var htmlParser =  new HtmlParser(raw);
     var results = htmlParser.selectValues(['//div[@class="details"]/@data-tickets'], (x) => x.split(','));
 
-    results = results.splice(1, 1);
+    results = results.splice(1, 3);
     results.forEach(showId => {
         var task = new Task("clipa_fetchAjaxFrame", fetchAjaxFrame, {showId : showId});
         taskPool.addTask(task);
@@ -34,51 +31,31 @@ async function fetchAjaxFrame(taskPool, options) {
     taskPool.addTask(new Task("processPage",processPage, {body : httpResult}));
 }
 
-function field(htmlText, target, onEnd = []) {
-    return {htmlText: htmlText,
-        target: target,
-        onEnd: (Array.isArray(onEnd) ? onEnd : [onEnd])}
-};
-
 async function processPage(taskPool, options) {
-    console.log('processPage');
-    var httpBody = options.body || await http.get(options.url);
-    var html =  new HtmlParser(httpBody);
+    console.log('processPage');   
+    var html =  new HtmlParser(options.body || await http.get(options.url));
 
     var links = html.selectValues(['//*[@class="ticket-link"]/a/@href', '//a[@class="read-more"]/@href']);
     links.forEach((link) => {
         taskPool.addTask(new Task("processPage", processPage, {url : link}));
     });
 
-    var prods = html.selectNodes('//div[contains(@class, "prod-details")]');
-
-    var liXPath = (text) => `//li[span[contains(text(),"${text}")]]/text()`;
-
-    function selectValue(xpath, defaultValue = '') { 
-        return () => { 
-            return html.selectValue(xpath, '');            
-        }
-    }
+    var prods = html.selectNodes('//div[contains(@class, "prod-details")]');    
 
     if(prods.length > 0) {
+        var liXPath = (text) => `//li[span[contains(text(),"${text}")]]/text()`;
+        var selectValue = (xpath, defaultValue = '') => (() => html.selectValue(xpath, ''));
 
         var fields = {
             date : [selectValue(liXPath('תאריך')), rx.match.date('.'), fh.parseDate("DD.MM.YY")],
             time: [selectValue(liXPath('שעה')), rx.replace.removeSpaces()],                        
             location: [selectValue(liXPath('מיקום')), rx.replace.removeSpaces()],
             title: [selectValue('//*[contains(@class, "section-title")]/text()'), rx.replace.removeSpaces()],
-            image: [selectValue('//div[contains(@class, "bg-image")]/@style'), rx.match.imageUrl()]
-            //location: {xpath: liXPath('מיקום'),  onEnd: [rx.replace.removeSpaces()]},
-            //title: {xpath: '//*[contains(@class, "section-title")]/text()',  onEnd: [rx.replace.removeSpaces()]},
-            //{xpath: '//div[contains(@class, "single-right")]', target: 'desc', onEnd: [fh.regexReplace(/[\r\n\t]/g)]},
-            //image: {xpath: '//div[contains(@class, "bg-image")]/@style', onEnd: [rx.match.imageUrl()]}
+            image: [selectValue('//div[contains(@class, "bg-image")]/@style'), rx.match.imageUrl()]            
         };
      
-        for(var key in fields){
-            fields[key] = fields[key].reduce((value, entity) => { return entity(value); }, '');
-        }
-
-        return fields;
+        
+        var x = fh.resolveFieldMethods(fields);        
     }
 }
 

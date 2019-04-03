@@ -30,9 +30,17 @@ function regexReplace(regex, replaceWith = ''){
     }
 }
 
+function resolveFieldMethods(fields){
+    for(var key in fields){
+        fields[key] = fields[key].reduce((value, entity) => { return entity(value); }, '');
+    }
+
+    return fields;
+}
 
 module.exports = {
     regexMatch : regexMatch,
     regexReplace : regexReplace,
-    parseDate : parseDate
+    parseDate : parseDate,
+    resolveFieldMethods : resolveFieldMethods
 }

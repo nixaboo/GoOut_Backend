@@ -3,7 +3,11 @@ var xpath = require('xpath')
 
 class HtmlParser {
     constructor(htmlRaw) { //option to pass http instead
-        this.doc = new dom().parseFromString(htmlRaw);
+        this.doc = new dom({errorHandler: {
+            warning: (msg) => {},
+            error: (msg) => {},
+            fatalError: (msg) => {},
+         }}).parseFromString(htmlRaw);
     }
 
     selectValues(xPathArr, iterNodeFn) {
