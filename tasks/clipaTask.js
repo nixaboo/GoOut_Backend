@@ -2,7 +2,7 @@ var Task = require('../crawler/task');
 var http = require('../crawler/http');
 var HtmlParser = require('../crawler/htmlParser');
 var fh = require('../crawler/fieldHelpers');
-
+var rx = require('../crawler/regex');
 
 var config = {
     urls : {
@@ -45,7 +45,7 @@ async function processPage(taskPool, options) {
     var httpBody = options.body || await http.get(options.url);
     var html =  new HtmlParser(httpBody);
 
-    var links = html.selectValues(['//*[@class="ticket-link"]/a/@href', '//a[@class="read-more"]/@href']);	//multi select
+    var links = html.selectValues(['//*[@class="ticket-link"]/a/@href', '//a[@class="read-more"]/@href']);
     links.forEach((link) => {
         taskPool.addTask(new Task("processPage", processPage, {url : link}));
     });
@@ -53,27 +53,32 @@ async function processPage(taskPool, options) {
     var prods = html.selectNodes('//div[contains(@class, "prod-details")]');
 
     var liXPath = (text) => `//li[span[contains(text(),"${text}")]]/text()`;
+
+    function selectValue(xpath, defaultValue = '') { 
+        return () => { 
+            return html.selectValue(xpath, '');            
+        }
+    }
+
     if(prods.length > 0) {
 
-        var fields = [{xpath: liXPath('תאריך'), target: 'date', onEnd: [fh.regexMatch(/\d+\.\d+\.\d+/), fh.parseDate("DD.MM.YY")]},
-                      {xpath: liXPath('שעה'), target: 'time', onEnd: [fh.regexReplace(/[\r\n\t]/g)]},
-                      {xpath: liXPath('מיקום'), target: 'location', onEnd: [fh.regexReplace(/[\r\n\t]/g)]},
-                      {xpath: '//*[contains(@class, "section-title")]/text()', target: 'title', onEnd: [fh.regexReplace(/[\r\n\t]/g)]},
-                      //{xpath: '//div[contains(@class, "single-right")]', target: 'desc', onEnd: [fh.regexReplace(/[\r\n\t]/g)]},
-                      {xpath: '//div[contains(@class, "bg-image")]/@style', target: 'image', onEnd: [fh.regexMatch(/(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png)/)]}];
+        var fields = {
+            date : [selectValue(liXPath('תאריך')), rx.match.date('.'), fh.parseDate("DD.MM.YY")],
+            time: [selectValue(liXPath('שעה')), rx.replace.removeSpaces()],                        
+            location: [selectValue(liXPath('מיקום')), rx.replace.removeSpaces()],
+            title: [selectValue('//*[contains(@class, "section-title")]/text()'), rx.replace.removeSpaces()],
+            image: [selectValue('//div[contains(@class, "bg-image")]/@style'), rx.match.imageUrl()]
+            //location: {xpath: liXPath('מיקום'),  onEnd: [rx.replace.removeSpaces()]},
+            //title: {xpath: '//*[contains(@class, "section-title")]/text()',  onEnd: [rx.replace.removeSpaces()]},
+            //{xpath: '//div[contains(@class, "single-right")]', target: 'desc', onEnd: [fh.regexReplace(/[\r\n\t]/g)]},
+            //image: {xpath: '//div[contains(@class, "bg-image")]/@style', onEnd: [rx.match.imageUrl()]}
+        };
+     
+        for(var key in fields){
+            fields[key] = fields[key].reduce((value, entity) => { return entity(value); }, '');
+        }
 
-
-        // values.title = parsed.findAll(undefined, 'section-title')[0].getText().replace(/[\r\n\t]/g, '');
-        // values.desc = parsed.findAll('div', ['col-md-6','col-sm-6','col-xs-12','single-right'])[0].prettify();
-        // var bgImage = parsed.findAll('div', 'bg-image')[0];
-        // values.image = bgImage.attrs.style.match(/(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png)/)[0];
-
-        var ret = {};
-        fields.forEach(field => {
-            var value = html.selectValue(field.xpath, '');
-            field.onEnd.forEach(fn => value = fn(value));
-            ret[field.target] = value;
-        })
+        return fields;
     }
 }
 
