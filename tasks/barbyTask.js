@@ -13,7 +13,7 @@ var config = {
 async function entry(taskPool, options) {
     var raw = await http.get(config.urls.SHOW_LISTING);
     var htmlParser =  new HtmlParser(raw);
-    var links = htmlParser.selectValues(['//div[@class="defShowListMain"]/a/@href']);
+    var links = htmlParser.selectAttributes(['//div[@class="defShowListMain"]/a/@href']);
     links.length = 1;
     links.forEach(url => {        
         //console.log(url);

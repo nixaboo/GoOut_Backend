@@ -1,0 +1,41 @@
+NOW:
+Re-do methods of HTTP Parser to make it easier to understand
+		Maybe leave all the iter->method things 
+
+
+resolveFieldMethods into CrawlerUtils  feed html into it so we can add custom xpath(commands) directly without passing html into them
+
+add into crawler utils .value() and content() to add commands easily into field resolve instead of each defining methods for it like 
+var selectValue = (xpath, defaultValue = '') => (() => html.selectValue(xpath, ''));
+
+CrawlerUtils -> Generate Tasks with this @attribute from this PAGE 
+	
+
+		
+//TODO: Compile-time XPATH checking  --> For now at LEAST runtime 
+
+Optimize way jobs are created so we don't need to also supply a string?
+
+LATER:
+//TODO; Support XPATH selections from previous selections without adding it to the xpath 
+//TODO: Convention to down-stream data for an entry while fetching events (ie bgImage here)
+//TODO: Logging methods on/off by level 
+
+MUCH LATER:
+//TODO: INSERT METHOD SPECIFIC LOGGERS 
+//TODO: Insert method specific task-pool entries (ie custom task-pool per task so if one bugs out etc)
+Optimize way jobs are created so we don't need to also supply a string?
+
+
+
+
+
+
+
+
+
+
+
+	
+	
+	

@@ -1,33 +1,17 @@
-var xpath = require('xpath')
-    , dom = require('xmldom').DOMParser
+var xpath = require('xpath'), 
+dom = require('xmldom').DOMParser,
+assert = require('chai').assert;
+
 
 class HtmlParser {
     constructor(htmlRaw) { //option to pass http instead
         this.doc = new dom({errorHandler: {
-            warning: (msg) => {},
+            warning: (msg) => {}, //ignore parsing errors, it spams the log
             error: (msg) => {},
             fatalError: (msg) => {},
          }}).parseFromString(htmlRaw);
     }
-
-    selectValues(xPathArr, iterNodeFn) {
-        var doc = this.doc;
-
-        if (typeof xPathArr == 'string')
-            xPathArr = [xPathArr];
-
-        var results = xPathArr.map(query => xpath.select(query, doc));
-        results = results.reduce((results, entry) => results.concat(entry), []);
-
-        if(iterNodeFn) {
-            results = results.map(x => iterNodeFn(x.nodeValue));
-        }else {
-            results = results.map(x => x.nodeValue);
-        }
-
-        return results.flat(); //flat is we split by something with our iterNodeFn
-    }
-
+    
     selectNodes(xPathArr) {
         var doc = this.doc;
         if (typeof xPathArr == 'string')
@@ -36,25 +20,37 @@ class HtmlParser {
         var results = xPathArr.map(query => xpath.select(query, doc));
         results = results.reduce((results, entry) => results.concat(entry), []);
 
-        return results; //flat is we split by something with our iterNodeFn
+        return results; 
     }
 
-    selectTextContentValue(xPath, defaultValue) {
-        var results = this.selectNodes(xPath);        
-        if(results && results.length > 0) { 
-            return results[0].textContent;
+    selectContents(xPathArr) {
+        return this.selectNodes(xPathArr).map(x => x.textContent);
+    }
+
+    selectContentSingle(xPathArr) { 
+        var r = this.selectContents(xPathArr);
+        return this._returnSingle(r);
+    }
+
+    selectAttributes(xPathArr){
+        return this.selectNodes(xPathArr).map(x => x.nodeValue);
+    }
+
+    selectAttributeSingle(xPathArr) {
+        var r = this.selectAttributes(xPathArr);
+        return this._returnSingle(r);
+    }
+
+
+    _returnSingle(results) { 
+        if(results && results.length > 0) {
+            return results[0];
         }
 
-        return defaultValue;
+        return undefined;
     }
+    
 
-    selectValue(xPath, defaultValue, iterNodeFn) {
-        var results = this.selectValues(xPath, iterNodeFn);
-        if(results.length > 0)
-            return results.join(""); //it can return multi line
-
-        return defaultValue;
-    }
 }
 
 module.exports = HtmlParser;

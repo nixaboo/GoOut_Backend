@@ -3,6 +3,7 @@ var http = require('../crawler/http');
 var HtmlParser = require('../crawler/htmlParser');
 var fh = require('../crawler/fieldHelpers');
 var rx = require('../crawler/regex');
+var cu = require('../crawler/crawlerUtils');
 
 var config = {
     urls : {
@@ -14,7 +15,7 @@ var config = {
 async function entry(taskPool, options) {
     var raw = await http.get(config.urls.SHOW_LISTING);
     var htmlParser =  new HtmlParser(raw);
-    var results = htmlParser.selectValues(['//div[@class="details"]/@data-tickets'], (x) => x.split(','));
+    var results = htmlParser.selectAttributes('//div[@class="details"]/@data-tickets').map((x) => x.split(',')).flat();
 
     results = results.splice(1, 3);
     results.forEach(showId => {
@@ -35,7 +36,7 @@ async function processPage(taskPool, options) {
     console.log('processPage');   
     var html =  new HtmlParser(options.body || await http.get(options.url));
 
-    var links = html.selectValues(['//*[@class="ticket-link"]/a/@href', '//a[@class="read-more"]/@href']);
+    var links = html.selectAttributes(['//*[@class="ticket-link"]/a/@href', '//a[@class="read-more"]/@href']);
     links.forEach((link) => {
         taskPool.addTask(new Task("processPage", processPage, {url : link}));
     });
@@ -43,21 +44,19 @@ async function processPage(taskPool, options) {
     var prods = html.selectNodes('//div[contains(@class, "prod-details")]');    
 
     if(prods.length > 0) {
-        var liXPath = (text, selector = '/text()') => `//li[span[contains(text(),"${text}")]]${selector}`;
-        var selectValue = (xpath, defaultValue = '') => (() => html.selectValue(xpath, ''));
-        var selectTextContent = (xpath, defaultValue = '') => (() => html.selectTextContentValue(xpath, defaultValue));
+        var liXPath = (text) => `//li[span[contains(text(),"${text}")]]`;
 
         var fields = {
-            date : [selectValue(liXPath('תאריך')), rx.match.date('.'), fh.parseDate("DD.MM.YY")],
-            price : [selectTextContent(liXPath('מחיר', '')), rx.match.number()],
-            time: [selectValue(liXPath('שעה')), rx.replace.removeNewLineAndTab()],                        
-            location: [selectValue(liXPath('מיקום')), rx.replace.removeNewLineAndTab()],
-            title: [selectValue('//*[contains(@class, "section-title")]/text()'), rx.replace.removeNewLineAndTab()],
-            image: [selectValue('//div[contains(@class, "bg-image")]/@style'), rx.match.imageUrl()]            
+            date : [cu.content(liXPath('תאריך')), rx.match.date('.'), fh.parseDate("DD.MM.YY")],
+            price : [cu.content(liXPath('מחיר')), rx.match.number()],
+            time: [cu.content(liXPath('שעה')), rx.replace.removeNewLineAndTab()],                        
+            location: [cu.content(liXPath('מיקום')), rx.replace.removeNewLineAndTab()],
+            title: [cu.content('//*[contains(@class, "section-title")]/text()'), rx.replace.removeNewLineAndTab()],
+            image: [cu.content('//div[contains(@class, "bg-image")]/@style'), rx.match.imageUrl()]            
         };
      
         
-        var x = fh.resolveFieldMethods(fields);        
+        var x = cu.resolveFields(fields, html);        
         console.log(JSON.stringify(x));
     }
 }
