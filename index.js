@@ -21,6 +21,7 @@ function start() {
     
     
     var t = require('./tasks/clipaTask');
+    //var t = require('./tasks/barbyTask');
     
     pool.addTask(t);
 }

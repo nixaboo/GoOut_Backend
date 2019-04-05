@@ -7,13 +7,19 @@ var regex = {
             return fh.regexMatch(r); 
         },
 
+        time : function() {                        
+            return fh.regexMatch(/\d+:\d+/); 
+        },
+        number : function() { 
+            return fh.regexMatch(/\d+/); 
+        },
         imageUrl : function() { 
             return fh.regexMatch(/(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png)/);
         }
     },
 
     replace : {
-        removeSpaces : function() {
+        removeNewLineAndTab : function() {
             return fh.regexReplace(/[\r\n\t]/g);
         }
     }

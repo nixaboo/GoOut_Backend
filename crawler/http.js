@@ -1,9 +1,16 @@
 var request = require('request');
 
+var headers = {
+    "User-Agent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36'                    
+};
+
 var http = {
-    get : async function(url, data) {
+    get : async function(url) {
         return new Promise((resolve, reject) => {
-            request.get(url, data, (error, res, body) => {
+            request.get({
+                headers: headers,
+                "url" : url
+            }, (error, res, body) => {
                 if(error)
                     reject();
 
@@ -14,7 +21,7 @@ var http = {
 
     getForm : async function(url, data) {
         return new Promise((resolve, reject) => {
-            request.get(url, { form: data }, (error, res, body) => {
+            request.get({ url: url, form: data, headers: headers }, (error, res, body) => {
                 if(error)
                     reject();
 
@@ -27,7 +34,7 @@ var http = {
 
     postForm : async function(url, data) {
         return new Promise((resolve, reject) => {
-            request.post(url, { form: data }, (error, res, body) => {
+            request.post({url: url, form: data, headers: headers }, (error, res, body) => {
                 if(error)
                     reject();
 

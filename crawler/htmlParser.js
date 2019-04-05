@@ -39,6 +39,15 @@ class HtmlParser {
         return results; //flat is we split by something with our iterNodeFn
     }
 
+    selectTextContentValue(xPath, defaultValue) {
+        var results = this.selectNodes(xPath);        
+        if(results && results.length > 0) { 
+            return results[0].textContent;
+        }
+
+        return defaultValue;
+    }
+
     selectValue(xPath, defaultValue, iterNodeFn) {
         var results = this.selectValues(xPath, iterNodeFn);
         if(results.length > 0)

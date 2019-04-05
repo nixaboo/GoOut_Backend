@@ -43,19 +43,22 @@ async function processPage(taskPool, options) {
     var prods = html.selectNodes('//div[contains(@class, "prod-details")]');    
 
     if(prods.length > 0) {
-        var liXPath = (text) => `//li[span[contains(text(),"${text}")]]/text()`;
+        var liXPath = (text, selector = '/text()') => `//li[span[contains(text(),"${text}")]]${selector}`;
         var selectValue = (xpath, defaultValue = '') => (() => html.selectValue(xpath, ''));
+        var selectTextContent = (xpath, defaultValue = '') => (() => html.selectTextContentValue(xpath, defaultValue));
 
         var fields = {
             date : [selectValue(liXPath('תאריך')), rx.match.date('.'), fh.parseDate("DD.MM.YY")],
-            time: [selectValue(liXPath('שעה')), rx.replace.removeSpaces()],                        
-            location: [selectValue(liXPath('מיקום')), rx.replace.removeSpaces()],
-            title: [selectValue('//*[contains(@class, "section-title")]/text()'), rx.replace.removeSpaces()],
+            price : [selectTextContent(liXPath('מחיר', '')), rx.match.number()],
+            time: [selectValue(liXPath('שעה')), rx.replace.removeNewLineAndTab()],                        
+            location: [selectValue(liXPath('מיקום')), rx.replace.removeNewLineAndTab()],
+            title: [selectValue('//*[contains(@class, "section-title")]/text()'), rx.replace.removeNewLineAndTab()],
             image: [selectValue('//div[contains(@class, "bg-image")]/@style'), rx.match.imageUrl()]            
         };
      
         
         var x = fh.resolveFieldMethods(fields);        
+        console.log(JSON.stringify(x));
     }
 }
 

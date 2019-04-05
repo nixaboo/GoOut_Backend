@@ -32,6 +32,9 @@ function regexReplace(regex, replaceWith = ''){
 
 function resolveFieldMethods(fields){
     for(var key in fields){
+        if(typeof fields[key]  === 'string')
+            continue;
+            
         fields[key] = fields[key].reduce((value, entity) => { return entity(value); }, '');
     }
 
