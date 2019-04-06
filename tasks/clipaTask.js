@@ -49,9 +49,9 @@ async function processPage(taskPool, options) {
         var fields = {
             date : [cu.content(liXPath('תאריך')), rx.match.date('.'), fh.parseDate("DD.MM.YY")],
             price : [cu.content(liXPath('מחיר')), rx.match.number()],
-            time: [cu.content(liXPath('שעה')), rx.replace.removeNewLineAndTab()],                        
-            location: [cu.content(liXPath('מיקום')), rx.replace.removeNewLineAndTab()],
-            title: [cu.content('//*[contains(@class, "section-title")]/text()'), rx.replace.removeNewLineAndTab()],
+            time: [cu.content(liXPath('שעה')), rx.replace.removeNewLineAndTabAndTrim()],                        
+            location: [cu.content(liXPath('מיקום')), rx.replace.removeNewLineAndTabAndTrim()],
+            title: [cu.content('//*[contains(@class, "section-title")]/text()'), rx.replace.removeNewLineAndTabAndTrim()],
             image: [cu.content('//div[contains(@class, "bg-image")]/@style'), rx.match.imageUrl()]            
         };
      

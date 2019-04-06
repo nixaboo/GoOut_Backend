@@ -2,6 +2,12 @@ var moment = require('moment');
 const assert = require('chai').assert;
 
 var methods = {
+    trim : function () {
+        return (value) => {             
+            return value.trim();
+        }
+    },
+
      regexMatch: function(regex) {
         return (value) => {   
             assert.isNotNull(regex);         
