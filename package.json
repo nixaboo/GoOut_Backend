@@ -23,6 +23,7 @@
     "moment": "^2.24.0",
     "mongoose": "^5.4.21",
     "mysql2": "^1.6.5",
+    "puppeteer": "^1.14.0",
     "request": "^2.88.0",
     "sequelize": "^4.43.0",
     "xmldom": "^0.1.27",

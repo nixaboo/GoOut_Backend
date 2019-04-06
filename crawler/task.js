@@ -16,6 +16,7 @@ class Task {
         this.task(taskPool, this.options).then(() => {
             t.isComplete = true;
         }).catch((e) => {
+            console.log('ERROR: ' + e);
             t.isError = true;
             t.isComplete = true;
         });

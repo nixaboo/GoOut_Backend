@@ -4,7 +4,8 @@ const assert = require('chai').assert;
 var methods = {
     trim : function () {
         return (value) => {             
-            return value.trim();
+
+            return value ? value.trim() : undefined;
         }
     },
 

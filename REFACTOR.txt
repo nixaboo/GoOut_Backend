@@ -1,12 +1,5 @@
 NOW:
-Re-do methods of HTTP Parser to make it easier to understand
-		Maybe leave all the iter->method things 
-
-
-resolveFieldMethods into CrawlerUtils  feed html into it so we can add custom xpath(commands) directly without passing html into them
-
-add into crawler utils .value() and content() to add commands easily into field resolve instead of each defining methods for it like 
-var selectValue = (xpath, defaultValue = '') => (() => html.selectValue(xpath, ''));
+HTTP-cache layer based on hash of URL + params 
 
 CrawlerUtils -> Generate Tasks with this @attribute from this PAGE 
 	
@@ -27,8 +20,15 @@ MUCH LATER:
 Optimize way jobs are created so we don't need to also supply a string?
 
 
+DONE: 
+Re-do methods of HTTP Parser to make it easier to understand
+		Maybe leave all the iter->method things 
 
 
+resolveFieldMethods into CrawlerUtils  feed html into it so we can add custom xpath(commands) directly without passing html into them
+
+add into crawler utils .value() and content() to add commands easily into field resolve instead of each defining methods for it like 
+var selectValue = (xpath, defaultValue = '') => (() => html.selectValue(xpath, ''));
 
 
 
