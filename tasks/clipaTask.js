@@ -33,21 +33,11 @@ async function fetchAjaxFrame(taskPool, options) {
     taskPool.addTask(new Task("processPage",processPage, {body : httpResult}));
 }
 
-var puppeteer = require('puppeteer');
-
 async function processPage(taskPool, options) {
     //console.log('processPage');   
     
-    options.url = 'https://www.clipa.co.il/product/%d7%97%d7%9c%d7%95%d7%9d-%d7%9c%d7%99%d7%9c-%d7%a7%d7%99%d7%a5-%d7%91%d7%97%d7%9c%d7%9c-25-05-19_20-30/';
-    const browser = await puppeteer.launch({headless: true,  executablePath: '/usr/bin/chromium-browser', args: ['--disable-dev-shm-usage']});
-    const page = await browser.newPage();
-    await page.goto(options.url, {waitUntil: 'networkidle0'});
-    const htmlContent = await page.content(); // serialized HTML of page DOM.
-    await browser.close();
-    //return html;
-    
-    //var html =  new HtmlParser(options.body || await http.get(options.url));
-    var html =  new HtmlParser(htmlContent);
+    options.url = 'https://www.clipa.co.il/product/%d7%97%d7%9c%d7%95%d7%9d-%d7%9c%d7%99%d7%9c-%d7%a7%d7%99%d7%a5-%d7%91%d7%97%d7%9c%d7%9c-25-05-19_20-30/';    
+    var html =  new HtmlParser(options.body || await http.getBrowser(options.url));    
 
     var links = html.selectAttributes(['//*[@class="ticket-link"]/a/@href', '//a[@class="read-more"]/@href']);
     links.forEach((link) => {
