@@ -58,4 +58,4 @@ async function proccessBuyTicketsPage(taskPool, options) {
 
 
 
-module.exports = new Task("clipaTask", entry);
+module.exports = new Task("barbyTask", entry);
