@@ -18,7 +18,7 @@ async function entry(taskPool, options) {
         
     var results = htmlParser.selectAttributes('//div[@class="details"]/@data-tickets').map((x) => x.split(',')).flat();
 
-    //results = results.splice(1, 3);
+    results = results.splice(1, 3);
     results.forEach(showId => {
         var task = new Task("clipa_fetchAjaxFrame", fetchAjaxFrame, {showId : showId});
         taskPool.addTask(task);

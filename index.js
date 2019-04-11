@@ -20,10 +20,10 @@ function start() {
     pool.start();
     
     
-    //var t = require('./tasks/clipaTask');
+    var t = require('./tasks/clipaTask');
     //var t = require('./tasks/barbyTask');
     //var t = require('./tasks/levontinTask');
-    //pool.addTask(t);
+    pool.addTask(t);
 }
 
 
